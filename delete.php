@@ -26,21 +26,41 @@
 	<hr>
 
 	<?php
-	//GETで送信されたidの取得
-	
-	//idが送信されていた場合は削除処理を実行
-	if(0){
-		//connect.phpを読み込み
-	
-		//DELETE文を作成して実行する
-		
-		//実行結果が0より大きければ削除に成功、そうでなければ失敗した旨を表示
-		if(0){
-			echo "<p>ユーザを削除しました。</p>";
-		}else{
-			echo "<p>ユーザが存在しません。</p>";
-		}
-	}
-	?>
+// GETで送信されたidの取得
+$id = $_GET['id'] ?? '';
+
+// idが送信されていた場合は削除処理を実行
+if (!empty($id)) {
+    $file = 'users.csv';
+    $temp_file = 'users_temp.csv';
+
+    // 一時ファイルを作成
+    $input = fopen($file, 'r');
+    $output = fopen($temp_file, 'w');
+    
+    $found = false;
+
+    // CSVファイルの内容を一行ずつ読み込み
+    while (($data = fgetcsv($input)) !== FALSE) {
+        if ($data[0] === $id) {
+            $found = true; // ユーザーが見つかった場合
+        } else {
+            fputcsv($output, $data); // 一時ファイルに書き込む
+        }
+    }
+
+    fclose($input);
+    fclose($output);
+
+    // 一時ファイルを元のファイルに置き換える
+    if ($found) {
+        rename($temp_file, $file);
+        echo "<p>ユーザを削除しました。</p>";
+    } else {
+        unlink($temp_file); // 一時ファイルを削除
+        echo "<p>ユーザが存在しません。</p>";
+    }
+}
+?>
 </body>
 </html>
